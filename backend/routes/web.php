@@ -6,8 +6,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    $clients = PortfolioClient::published()->inGridOrder()->get();
+
     return view('portfolio', [
-        'totalClients' => PortfolioClient::published()->count(),
+        'totalClients' => $clients->count(),
+        'marqueeClients' => $clients,
     ]);
 })->name('portfolio');
 

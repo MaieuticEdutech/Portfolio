@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\PortfolioClient;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class PortfolioSeeder extends Seeder
 {
@@ -110,43 +111,69 @@ class PortfolioSeeder extends Seeder
 
     public function run(): void
     {
-        $order = 0;
+        foreach ($this->interleaved() as $order => [$category, $index, $name]) {
+            $gradient = self::GRADIENTS[$category][$index % count(self::GRADIENTS[$category])];
+            $types = self::PROJECT_TYPES[$category];
 
-        foreach (['educational' => self::EDUCATIONAL, 'corporate' => self::CORPORATE] as $category => $names) {
-            foreach ($names as $index => $name) {
-                $gradient = self::GRADIENTS[$category][$index % count(self::GRADIENTS[$category])];
-                $types = self::PROJECT_TYPES[$category];
+            $client = PortfolioClient::updateOrCreate(
+                ['slug' => Str::slug($name)],
+                [
+                    'name' => $name,
+                    'category' => $category,
+                    'project_type' => $types[$index % count($types)],
+                    'year' => self::YEARS[$index % count(self::YEARS)],
+                    'accent_gradient_start' => $gradient[0],
+                    'accent_gradient_mid' => $gradient[1],
+                    'accent_gradient_end' => $gradient[2],
+                    'tile_size' => match (true) {
+                        in_array($name, self::BIG_TILES, true) => 'big',
+                        in_array($name, self::MED_TILES, true) => 'med',
+                        default => 'small',
+                    },
+                    'sort_order' => $order,
+                    'is_published' => true,
+                ]
+            );
 
-                $client = PortfolioClient::updateOrCreate(
-                    ['slug' => PortfolioClient::uniqueSlug($name)],
-                    [
-                        'name' => $name,
-                        'category' => $category,
-                        'project_type' => $types[$index % count($types)],
-                        'year' => self::YEARS[$index % count(self::YEARS)],
-                        'accent_gradient_start' => $gradient[0],
-                        'accent_gradient_mid' => $gradient[1],
-                        'accent_gradient_end' => $gradient[2],
-                        'tile_size' => match (true) {
-                            in_array($name, self::BIG_TILES, true) => 'big',
-                            in_array($name, self::MED_TILES, true) => 'med',
-                            default => 'small',
-                        },
-                        'sort_order' => $order++,
-                        'is_published' => true,
-                    ]
-                );
-
-                // three placeholder sample slots per client — real footage drops into these rows
-                if ($client->videos()->count() === 0) {
-                    foreach (range(1, 3) as $n) {
-                        $client->videos()->create([
-                            'title' => "{$name} — Sample {$n}",
-                            'sort_order' => $n - 1,
-                        ]);
-                    }
+            // three placeholder sample slots per client — real footage drops into these rows
+            if ($client->videos()->count() === 0) {
+                foreach (range(1, 3) as $n) {
+                    $client->videos()->create([
+                        'title' => "{$name} — Sample {$n}",
+                        'sort_order' => $n - 1,
+                    ]);
                 }
             }
         }
+    }
+
+    /**
+     * Educational and corporate clients spread evenly through the grid so the
+     * "All work" view mixes teal and red tiles instead of showing two blocks.
+     * Each category's internal order is preserved, so the single-sector
+     * filters read exactly as their lists above.
+     *
+     * @return list<array{string, int, string}> [category, index within category, name]
+     */
+    private function interleaved(): array
+    {
+        $lists = ['educational' => self::EDUCATIONAL, 'corporate' => self::CORPORATE];
+        $taken = array_fill_keys(array_keys($lists), 0);
+        $total = array_sum(array_map('count', $lists));
+        $sequence = [];
+
+        for ($i = 0; $i < $total; $i++) {
+            // always draw from whichever category is furthest behind its share
+            $category = collect($lists)
+                ->keys()
+                ->filter(fn (string $c) => $taken[$c] < count($lists[$c]))
+                ->sortBy(fn (string $c) => $taken[$c] / count($lists[$c]))
+                ->first();
+
+            $sequence[] = [$category, $taken[$category], $lists[$category][$taken[$category]]];
+            $taken[$category]++;
+        }
+
+        return $sequence;
     }
 }
