@@ -50,6 +50,28 @@ it('keeps hero motion out of the way of reduced-motion users', function () {
     // reduced-motion block targets are the ones actually rendered.
     $this->get('/')
         ->assertSee('hero-drift-one', false)
-        ->assertSee('hero-frames', false)
-        ->assertSee('hero-sprockets', false);
+        ->assertSee('hero-sprockets', false)
+        // The loop is hidden for reduced motion, uncovering the still gradient.
+        ->assertSee('motion-reduce:hidden', false);
+});
+
+it('backs the placeholder with the generated loop', function () {
+    PortfolioClient::factory()->create();
+
+    $this->get('/')->assertSee('media/showreel-loop.webp', false);
+
+    expect(public_path('media/showreel-loop.webp'))->toBeReadableFile();
+});
+
+it('ships the loop as a genuinely animated file', function () {
+    $bytes = file_get_contents(public_path('media/showreel-loop.webp'));
+
+    // GD cannot decode animated WebP, so read the container: an animation
+    // carries an ANIM chunk and one ANMF chunk per frame. A still file has
+    // neither, which is the regression worth catching if the asset is ever
+    // re-exported by hand.
+    expect(substr($bytes, 0, 4))->toBe('RIFF')
+        ->and(substr($bytes, 8, 4))->toBe('WEBP')
+        ->and(str_contains($bytes, 'ANIM'))->toBeTrue()
+        ->and(substr_count($bytes, 'ANMF'))->toBeGreaterThan(30);
 });
