@@ -41,14 +41,22 @@
                         <span class="mt-1 block text-lg font-semibold text-white">{{ $heroFilm->client->name }}</span>
                     </span>
                 @else
-                    {{-- A strip of film advancing behind the brand wash. Sprocket holes
-                         and frame edges are gradients, so there is no asset to ship. --}}
-                    <span aria-hidden="true" class="absolute inset-0 bg-[linear-gradient(120deg,#00615C_0%,#008680_38%,#15D9A1_52%,#008680_66%,#003D3A_100%)]"></span>
+                    {{-- Generated loop rather than stock footage: it is drawn from the
+                         brand's own teal ramp, carries no licence, and cannot be
+                         mistaken for a client's film the way real footage would. --}}
+                    <img
+                        src="{{ asset('media/showreel-loop.webp') }}"
+                        alt=""
+                        aria-hidden="true"
+                        class="absolute inset-0 size-full object-cover motion-reduce:hidden"
+                    >
+                    {{-- Still fallback for reduced motion, and while the loop decodes --}}
+                    <span aria-hidden="true" class="absolute inset-0 -z-10 bg-[linear-gradient(120deg,#00615C_0%,#008680_38%,#15D9A1_52%,#008680_66%,#003D3A_100%)]"></span>
                     <span aria-hidden="true" class="hero-sheen absolute inset-0"></span>
-                    <span aria-hidden="true" class="hero-frames absolute inset-x-0 top-1/2 h-1/2 -translate-y-1/2 opacity-70"></span>
-                    <span aria-hidden="true" class="hero-sprockets absolute inset-x-0 top-4 h-4 opacity-80"></span>
-                    <span aria-hidden="true" class="hero-sprockets absolute inset-x-0 bottom-4 h-4 opacity-80"></span>
+                    <span aria-hidden="true" class="hero-sprockets absolute inset-x-0 top-4 h-4 opacity-50"></span>
+                    <span aria-hidden="true" class="hero-sprockets absolute inset-x-0 bottom-4 h-4 opacity-50"></span>
                     <span aria-hidden="true" class="tile-grain absolute inset-0 opacity-25 mix-blend-overlay"></span>
+                    <span aria-hidden="true" class="absolute inset-0 bg-black/15"></span>
 
                     <span class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
                         <span class="hero-pulse grid size-14 place-items-center rounded-full bg-white/15 ring-1 ring-white/30 backdrop-blur-sm">
