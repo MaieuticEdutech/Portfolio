@@ -143,15 +143,16 @@
                     {{-- Logo sits in the band between the top rail and the name, so it never collides with either --}}
                     <span class="relative flex size-full flex-col justify-end p-3 sm:p-4 {{ $isBig ? 'sm:p-6' : '' }}">
                         @if ($client->logoUrl())
-                            <span class="flex min-h-0 flex-1 items-end pb-1.5 pt-7 {{ $isBig ? 'sm:pb-3 sm:pt-8' : '' }}">
-                                {{-- Logos keep their brand colours on a white plate: the supplied files mix
-                                     transparent marks with opaque white backgrounds, and the plate makes both read the same --}}
-                                <span class="inline-flex max-h-full items-center justify-center overflow-hidden rounded-xl bg-white shadow-[0_6px_20px_-8px_rgba(0,0,0,0.6)] ring-1 ring-black/10 transition duration-300 group-hover:shadow-[0_10px_28px_-8px_rgba(0,0,0,0.7)] {{ $isBig ? 'h-16 max-w-[70%] p-2 sm:h-24 sm:p-2.5' : 'h-11 max-w-[75%] p-1.5 sm:h-14' }}">
+                            <span class="flex min-h-0 w-full flex-1 pb-2 pt-8 sm:pt-9 {{ $isBig ? 'sm:pb-3 sm:pt-10' : '' }}">
+                                {{-- Logos keep their brand colours on a white plate that fills the band between the
+                                     rail and the name. The supplied files mix transparent marks with opaque white
+                                     backgrounds, and the plate makes both read the same --}}
+                                <span class="flex size-full min-h-0 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-[0_10px_30px_-10px_rgba(0,0,0,0.65)] ring-1 ring-black/10 transition duration-300 group-hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.75)] {{ $isBig ? 'p-4 sm:p-6' : 'p-3 sm:p-4' }}">
                                     <img
                                         src="{{ $client->logoUrl() }}"
                                         alt="{{ $client->name }} logo"
                                         loading="lazy"
-                                        class="h-full w-auto max-w-full object-contain"
+                                        class="size-full object-contain"
                                     >
                                 </span>
                             </span>
