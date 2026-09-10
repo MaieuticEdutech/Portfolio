@@ -27,6 +27,12 @@ Route::prefix('studio')->name('admin.')->group(function () {
     Route::middleware('auth')->group(function () {
         Route::view('/', 'admin.dashboard')->name('dashboard');
 
+        Route::view('/clients', 'admin.clients')->name('clients');
+
+        Route::get('/clients/{client}/films', function (PortfolioClient $client) {
+            return view('admin.client-films', ['client' => $client]);
+        })->name('clients.films');
+
         Route::post('/logout', function (Request $request) {
             Auth::logout();
             $request->session()->invalidate();
