@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\PortfolioClient;
+use App\Models\PortfolioVideo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +12,14 @@ Route::get('/', function () {
     return view('portfolio', [
         'totalClients' => $clients->count(),
         'marqueeClients' => $clients,
+        // The showreel is simply the first film with footage uploaded. Until one
+        // exists the hero falls back to a generated panel rather than a gap.
+        'heroFilm' => PortfolioVideo::query()
+            ->whereNotNull('video_path')
+            ->whereHas('client', fn ($q) => $q->published())
+            ->orderBy('portfolio_client_id')
+            ->orderBy('sort_order')
+            ->first(),
     ]);
 })->name('portfolio');
 

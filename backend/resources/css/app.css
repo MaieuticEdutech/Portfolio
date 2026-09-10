@@ -56,6 +56,19 @@
         animation: tile-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
     }
 
+    /* Hero aurora. Three blurred brand discs on long, offset drifts, so the
+       white page is never completely still without ever calling attention
+       to itself. */
+    @keyframes hero-drift {
+        0%   { transform: translate3d(0, 0, 0) scale(1); }
+        50%  { transform: translate3d(4%, -6%, 0) scale(1.12); }
+        100% { transform: translate3d(0, 0, 0) scale(1); }
+    }
+
+    .hero-drift-one   { animation: hero-drift 19s ease-in-out infinite; }
+    .hero-drift-two   { animation: hero-drift 23s ease-in-out -7s infinite reverse; }
+    .hero-drift-three { animation: hero-drift 27s ease-in-out -13s infinite; }
+
     /* Fine film grain laid over the tile gradients so they read as printed
        posters rather than flat CSS fills. Pure SVG turbulence — no asset. */
     .tile-grain {
@@ -81,6 +94,9 @@
     @media (prefers-reduced-motion: reduce) {
         .animate-tile-in,
         .animate-marquee,
-        .animate-marquee-reverse { animation: none; }
+        .animate-marquee-reverse,
+        .hero-drift-one,
+        .hero-drift-two,
+        .hero-drift-three { animation: none; }
     }
 }
