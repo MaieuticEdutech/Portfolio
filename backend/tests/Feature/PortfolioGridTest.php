@@ -109,3 +109,13 @@ it('orders big tiles ahead of smaller ones at the same sort order', function () 
     Livewire::test('portfolio-grid')
         ->assertSeeInOrder(['Big One', 'Med One', 'Small One']);
 });
+
+it('floats published clients across the header wall', function () {
+    PortfolioClient::factory()->corporate()->create(['name' => 'Floating Corp']);
+    PortfolioClient::factory()->unpublished()->create(['name' => 'Sunken Corp']);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertSeeInOrder(['data-logo-marquee', 'Floating Corp'], false)
+        ->assertDontSee('Sunken Corp');
+});

@@ -17,12 +17,14 @@
                         wire:click="filterBy('{{ $key }}')"
                         aria-pressed="{{ $category === $key ? 'true' : 'false' }}"
                         class="group flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition
-                            {{ $category === $key
-                                ? 'border-brand-mint/60 bg-brand-mint/15 text-brand-mint'
-                                : 'border-white/10 bg-white/5 text-white/60 hover:border-white/25 hover:text-white' }}"
+                            {{ match (true) {
+                                $category !== $key => 'border-white/10 bg-white/5 text-white/60 hover:border-white/25 hover:text-white',
+                                $key === 'corporate' => 'border-brand-coral/60 bg-brand-coral/15 text-brand-coral shadow-[0_0_24px_-6px_rgba(248,132,126,0.6)]',
+                                default => 'border-brand-mint/60 bg-brand-mint/15 text-brand-mint shadow-[0_0_24px_-6px_rgba(21,217,161,0.6)]',
+                            } }}"
                     >
                         {{ $label }}
-                        <span class="rounded-full px-1.5 py-0.5 text-xs tabular-nums {{ $category === $key ? 'bg-brand-mint/20' : 'bg-white/5 text-white/40' }}">
+                        <span class="rounded-full px-1.5 py-0.5 text-xs tabular-nums {{ $category === $key ? ($key === 'corporate' ? 'bg-brand-coral/20' : 'bg-brand-mint/20') : 'bg-white/5 text-white/40' }}">
                             {{ $this->counts[$key] }}
                         </span>
                     </button>
@@ -53,18 +55,27 @@
             </button>
         </div>
     @else
-        <div class="grid auto-rows-[7rem] grid-cols-2 gap-3 sm:auto-rows-[8rem] sm:grid-cols-4 lg:grid-cols-6">
+        {{-- grid-flow-dense backfills the gaps big tiles leave, so the wall reads as one solid mosaic --}}
+        <div class="grid auto-rows-[7.5rem] grid-flow-dense grid-cols-2 gap-3 sm:auto-rows-[8.5rem] sm:grid-cols-4 sm:gap-4 lg:grid-cols-6">
             @foreach ($this->clients as $index => $client)
                 @php
+                    // Sector colour lives in the top-left corner and settles into the shared
+                    // ink ground, so adjacent teal and red tiles meet dark-to-dark instead of
+                    // clashing edge to edge.
                     $stops = $client->gradientStops();
-                    $gradient = count($stops) > 1
-                        ? 'linear-gradient(135deg, '.implode(', ', $stops).')'
-                        : ($stops[0] ?? '#0C1817');
+                    $highlight = $stops[0] ?? '#0C1817';
+                    $tone = $stops[count($stops) - 1] ?? $highlight;
+                    $gradient = "radial-gradient(85% 70% at 0% 0%, {$highlight} 0%, transparent 62%), "
+                        ."linear-gradient(150deg, color-mix(in oklab, {$tone} 62%, #0C1817) 0%, #0C1817 78%)";
+                    $isBig = $client->tile_size === 'big';
+                    $isMed = $client->tile_size === 'med';
+                    $isEducational = $client->category === 'educational';
                     $span = match ($client->tile_size) {
-                        'big' => 'col-span-2 row-span-2',
-                        'med' => 'col-span-2 row-span-1',
-                        default => 'col-span-1 row-span-1',
+                        'big' => 'col-span-2 row-span-2 rounded-3xl',
+                        'med' => 'col-span-2 row-span-1 rounded-2xl',
+                        default => 'col-span-1 row-span-1 rounded-2xl',
                     };
+                    $initial = Str::upper(Str::substr($client->name, 0, 1));
                 @endphp
 
                 <button
@@ -72,37 +83,72 @@
                     wire:key="client-{{ $client->id }}"
                     wire:click="select({{ $client->id }})"
                     style="animation-delay: {{ min($index, 24) * 25 }}ms"
-                    class="animate-tile-in group relative isolate overflow-hidden rounded-2xl text-left ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:ring-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-mint {{ $span }}"
+                    class="animate-tile-in group relative isolate overflow-hidden text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-white/10 transition duration-300 hover:-translate-y-1.5 hover:ring-white/40 focus:outline-none focus-visible:ring-2 {{ $span }}
+                        {{ $isEducational
+                            ? 'hover:shadow-[0_28px_60px_-18px_rgba(21,217,161,0.55)] focus-visible:ring-brand-mint'
+                            : 'hover:shadow-[0_28px_60px_-18px_rgba(248,132,126,0.55)] focus-visible:ring-brand-coral' }}"
                 >
-                    <span class="absolute inset-0 -z-10 transition-transform duration-500 group-hover:scale-105" style="background: {{ $gradient }}"></span>
-                    <span class="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></span>
+                    {{-- Layered surface: brand gradient, a soft light source, film grain, then a vignette for legibility --}}
+                    <span class="absolute inset-0 -z-10 transition-transform duration-700 ease-out group-hover:scale-110" style="background: {{ $gradient }}"></span>
+                    <span class="absolute inset-0 -z-10 bg-[radial-gradient(120%_90%_at_0%_0%,rgba(255,255,255,0.18),transparent_55%)] mix-blend-soft-light"></span>
+                    <span class="tile-grain absolute inset-0 -z-10 opacity-40 mix-blend-overlay"></span>
+                    <span class="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></span>
+                    <span aria-hidden="true" class="absolute inset-0 -z-10 -translate-x-full skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 ease-out group-hover:translate-x-full"></span>
 
-                    @if ($client->logoUrl())
-                        <img src="{{ $client->logoUrl() }}" alt="{{ $client->name }} logo" class="absolute inset-0 -z-10 size-full object-contain p-6 opacity-90 mix-blend-luminosity">
-                    @endif
+                    {{-- Watermark monogram gives every tile its own signature while logos are pending --}}
+                    @unless ($client->logoUrl())
+                        <span aria-hidden="true" class="pointer-events-none absolute -bottom-3 -right-1 select-none font-bold leading-none tracking-tighter text-white/[0.08] transition duration-500 group-hover:-translate-y-2 group-hover:text-white/[0.14] {{ $isBig ? 'text-[9rem] sm:text-[13rem]' : ($isMed ? 'text-[6.5rem] sm:text-[8rem]' : 'text-[5.5rem] sm:text-[6.5rem]') }}">
+                            {{ $initial }}
+                        </span>
+                    @endunless
 
-                    <span class="relative flex size-full flex-col justify-end p-3 sm:p-4">
-                        <span class="text-balance font-semibold leading-tight text-white drop-shadow {{ $client->tile_size === 'big' ? 'text-lg sm:text-2xl' : ($client->tile_size === 'med' ? 'text-sm sm:text-base' : 'text-xs sm:text-sm') }}">
-                            {{ $client->name }}
+                    {{-- Top rail: sector tag + film count --}}
+                    <span class="absolute inset-x-3 top-3 flex items-center justify-between gap-2 sm:inset-x-4 sm:top-4">
+                        <span class="flex items-center gap-1.5 rounded-full bg-black/30 py-1 pl-2 pr-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/85 ring-1 ring-white/10 backdrop-blur-sm">
+                            <span class="size-1.5 rounded-full shadow-[0_0_8px_currentColor] {{ $isEducational ? 'bg-brand-mint text-brand-mint' : 'bg-brand-coral text-brand-coral' }}"></span>
+                            <span class="{{ $isBig || $isMed ? '' : 'hidden sm:inline' }}">{{ $isEducational ? 'Education' : 'Corporate' }}</span>
                         </span>
 
-                        <span class="mt-1 flex items-center gap-2 text-[11px] text-white/70 opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:text-xs">
-                            <span class="truncate">{{ $client->project_type }}</span>
-                            @if ($client->year)
-                                <span aria-hidden="true">&middot;</span><span>{{ $client->year }}</span>
-                            @endif
+                        <span class="flex items-center gap-1 rounded-full bg-black/30 px-2 py-1 text-[11px] font-medium tabular-nums text-white/85 ring-1 ring-white/10 backdrop-blur-sm">
+                            <svg class="size-2.5" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5L3 1.5Z" /></svg>
+                            {{ $client->videos_count }}<span class="sr-only"> films</span>
                         </span>
                     </span>
 
-                    <span class="absolute right-3 top-3 rounded-full bg-black/40 px-2 py-0.5 text-[11px] font-medium text-white/80 backdrop-blur-sm">
-                        {{ $client->videos_count }}
+                    {{-- Logo sits in the band between the top rail and the name, so it never collides with either --}}
+                    <span class="relative flex size-full flex-col justify-end p-3 sm:p-4 {{ $isBig ? 'sm:p-6' : '' }}">
+                        @if ($client->logoUrl())
+                            <span class="flex min-h-0 flex-1 items-end pb-1.5 pt-7 {{ $isBig ? 'sm:pb-3 sm:pt-8' : '' }}">
+                                {{-- Marks are flattened to white so dark wordmarks stay legible on the ink gradient --}}
+                                <img
+                                    src="{{ $client->logoUrl() }}"
+                                    alt="{{ $client->name }} logo"
+                                    loading="lazy"
+                                    class="w-auto max-h-full object-contain object-left-bottom opacity-90 brightness-0 invert drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition duration-300 group-hover:opacity-100 {{ $isBig ? 'h-12 max-w-[70%] sm:h-16' : 'h-6 max-w-[75%] sm:h-8' }}"
+                                >
+                            </span>
+                        @endif
+
+                        <span class="text-balance font-bold leading-[1.05] tracking-tight text-white drop-shadow-md {{ $isBig ? 'text-2xl sm:text-4xl' : ($isMed ? 'text-base sm:text-xl' : 'text-sm sm:text-base') }}">
+                            {{ $client->name }}
+                        </span>
+
+                        <span class="mt-1.5 flex items-center gap-2 text-[11px] text-white/70 transition duration-300 sm:text-xs {{ $isBig ? 'sm:mt-2 sm:text-sm' : 'translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-100' }}">
+                            <span class="truncate">{{ $client->project_type }}</span>
+                            @if ($client->year)
+                                <span aria-hidden="true" class="text-white/40">&middot;</span><span class="tabular-nums">{{ $client->year }}</span>
+                            @endif
+                            <span aria-hidden="true" class="ml-auto -translate-x-1 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100 {{ $isEducational ? 'text-brand-mint' : 'text-brand-coral' }}">&rarr;</span>
+                        </span>
                     </span>
                 </button>
             @endforeach
         </div>
 
-        <p class="mt-8 text-center text-sm text-white/35">
+        <p class="mt-10 flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-white/35">
+            <span class="h-px w-8 bg-white/10"></span>
             Showing {{ $this->clients->count() }} of {{ $this->counts['all'] }} clients
+            <span class="h-px w-8 bg-white/10"></span>
         </p>
     @endif
 

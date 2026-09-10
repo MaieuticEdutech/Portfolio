@@ -5,6 +5,35 @@
             <div class="absolute -right-24 top-10 size-80 rounded-full bg-brand-red/20 blur-3xl"></div>
         </div>
 
+        {{-- Client wall: two slow counter-scrolling rows behind the copy. Logos appear
+             as they are uploaded; until then each card carries the client name. --}}
+        @if ($marqueeClients->isNotEmpty())
+            <div
+                aria-hidden="true"
+                data-logo-marquee
+                class="pointer-events-none absolute inset-x-0 top-1/2 -z-10 -translate-y-1/2 select-none space-y-5 [mask-image:linear-gradient(90deg,transparent,black_15%,black_85%,transparent)]"
+            >
+                @foreach ([['clients' => $marqueeClients, 'motion' => 'animate-marquee'], ['clients' => $marqueeClients->reverse(), 'motion' => 'animate-marquee-reverse']] as $row)
+                    <div class="flex w-max gap-5 {{ $row['motion'] }}">
+                        @foreach ([0, 1] as $copy)
+                            @foreach ($row['clients'] as $client)
+                                <div class="flex h-16 w-44 shrink-0 items-center justify-center rounded-2xl bg-white/[0.035] px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ring-1 ring-white/[0.06] sm:h-20 sm:w-52">
+                                    @if ($client->logoUrl())
+                                        <img src="{{ $client->logoUrl() }}" alt="" loading="lazy" class="max-h-8 w-auto max-w-full opacity-50 brightness-0 invert sm:max-h-10">
+                                    @else
+                                        <span class="truncate text-center text-xs font-semibold tracking-wide text-white/25">{{ $client->name }}</span>
+                                    @endif
+                                </div>
+                            @endforeach
+                        @endforeach
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Keeps the headline crisp where it overlaps the wall --}}
+            <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-ink-900 via-ink-900/75 to-ink-900/20"></div>
+        @endif
+
         <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
             <p class="text-xs font-semibold uppercase tracking-[0.3em] text-brand-mint">Selected work</p>
 
