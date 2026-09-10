@@ -76,6 +76,7 @@
                         default => 'col-span-1 row-span-1 rounded-2xl',
                     };
                     $initial = Str::upper(Str::substr($client->name, 0, 1));
+                    $preview = $client->previewVideo;
                 @endphp
 
                 <button
@@ -83,17 +84,38 @@
                     wire:key="client-{{ $client->id }}"
                     wire:click="select({{ $client->id }})"
                     style="animation-delay: {{ min($index, 24) * 25 }}ms"
-                    class="animate-tile-in group relative isolate overflow-hidden text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-white/10 transition duration-300 hover:-translate-y-1.5 hover:ring-white/40 focus:outline-none focus-visible:ring-2 {{ $span }}
+                    @if ($preview)
+                        x-data
+                        x-on:mouseenter="if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) $refs.preview?.play()"
+                        x-on:mouseleave="if ($refs.preview) { $refs.preview.pause(); $refs.preview.currentTime = 0; }"
+                    @endif
+                    class="animate-tile-in group relative isolate overflow-hidden text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:ring-white/40 focus:outline-none focus-visible:ring-2 {{ $span }}
                         {{ $isEducational
                             ? 'hover:shadow-[0_28px_60px_-18px_rgba(21,217,161,0.55)] focus-visible:ring-brand-mint'
                             : 'hover:shadow-[0_28px_60px_-18px_rgba(248,132,126,0.55)] focus-visible:ring-brand-coral' }}"
                 >
                     {{-- Layered surface: brand gradient, a soft light source, film grain, then a vignette for legibility --}}
-                    <span class="absolute inset-0 -z-10 transition-transform duration-700 ease-out group-hover:scale-110" style="background: {{ $gradient }}"></span>
+                    <span class="absolute inset-0 -z-10 transition-transform duration-700 ease-out group-hover:scale-105" style="background: {{ $gradient }}"></span>
                     <span class="absolute inset-0 -z-10 bg-[radial-gradient(120%_90%_at_0%_0%,rgba(255,255,255,0.18),transparent_55%)] mix-blend-soft-light"></span>
                     <span class="tile-grain absolute inset-0 -z-10 opacity-40 mix-blend-overlay"></span>
+
+                    @if ($preview)
+                        {{-- The work itself is the best argument for it, so the film fades up on hover --}}
+                        <video
+                            x-ref="preview"
+                            muted
+                            loop
+                            playsinline
+                            preload="none"
+                            aria-hidden="true"
+                            tabindex="-1"
+                            @if ($preview->thumbnailUrl()) poster="{{ $preview->thumbnailUrl() }}" @endif
+                            class="pointer-events-none absolute inset-0 -z-10 size-full object-cover opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100 motion-reduce:transition-none"
+                        >
+                            <source src="{{ $preview->source() }}">
+                        </video>
+                    @endif
                     <span class="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></span>
-                    <span aria-hidden="true" class="absolute inset-0 -z-10 -translate-x-full skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 ease-out group-hover:translate-x-full"></span>
 
                     {{-- Watermark monogram gives every tile its own signature while logos are pending --}}
                     @unless ($client->logoUrl())
