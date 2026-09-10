@@ -17,16 +17,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Media Disk
+    | Media Disks
     |--------------------------------------------------------------------------
     |
-    | Where client logos and films are stored. Local disk in development;
-    | set MEDIA_DISK=s3 with the Cloudflare R2 credentials to move it to
-    | object storage without touching application code.
+    | Logos and films are stored separately because they behave differently.
+    | Logos are small, static and committed to the repository, so they ship
+    | with a deploy and stay on the public disk. Films are large and uploaded
+    | through the studio, so they belong in object storage: set FILM_DISK=s3
+    | with the Cloudflare R2 credentials.
     |
     */
 
-    'media' => env('MEDIA_DISK', 'public'),
+    'logos' => env('LOGO_DISK', 'public'),
+
+    'films' => env('FILM_DISK', 'public'),
 
     /*
     |--------------------------------------------------------------------------

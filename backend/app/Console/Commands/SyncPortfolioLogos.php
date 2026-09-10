@@ -9,20 +9,37 @@ use Illuminate\Support\Facades\Storage;
 class SyncPortfolioLogos extends Command
 {
     protected $signature = 'portfolio:sync-logos
-                            {--dir=logos : Folder on the public disk that holds the logo files}';
+                            {--dir=logos : Folder on the logo disk that holds the logo files}
+                            {--force : Clear every logo path even when no files were found}';
 
-    protected $description = 'Link logo files on the public disk to clients by slug (logos/<slug>.webp)';
+    protected $description = 'Link logo files on the logo disk to clients by slug (logos/<slug>.webp)';
 
     private const EXTENSIONS = ['webp', 'png', 'svg', 'jpg', 'jpeg'];
 
     public function handle(): int
     {
-        $disk = Storage::disk('public');
+        $disk = Storage::disk(config('filesystems.logos'));
         $dir = trim($this->option('dir'), '/');
 
         $filesBySlug = collect($disk->files($dir))
             ->filter(fn (string $path) => in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), self::EXTENSIONS, true))
             ->keyBy(fn (string $path) => pathinfo($path, PATHINFO_FILENAME));
+
+        // On local disk an empty folder genuinely means the logos were removed.
+        // On a remote disk it far more often means the bucket or credentials are
+        // wrong, and clearing every path would throw away real work.
+        $diskName = config('filesystems.logos');
+        $isRemote = config("filesystems.disks.{$diskName}.driver") !== 'local';
+
+        if ($isRemote && $filesBySlug->isEmpty() && ! $this->option('force')) {
+            $this->components->error(
+                "No logo files found in [{$dir}] on the remote [{$diskName}] disk. "
+                .'Refusing to clear existing logo paths. Check LOGO_DISK and the bucket '
+                .'contents, or pass --force if this is intentional.'
+            );
+
+            return self::FAILURE;
+        }
 
         $linked = 0;
         $cleared = 0;

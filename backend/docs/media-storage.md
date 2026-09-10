@@ -1,7 +1,7 @@
 # Media storage
 
-Client logos and films are written to whichever disk `config('filesystems.media')`
-names. Locally that is the `public` disk; in production it is Cloudflare R2.
+Client logos and films are written to the disks named by `config('filesystems.logos')`
+and `config('filesystems.films')`. Locally those are the `public` disk; in production it is Cloudflare R2.
 No application code changes between the two.
 
 ## Switching to R2
@@ -10,7 +10,7 @@ Once IT provides the bucket and token, set these in `.env` on the server.
 Never in `.env.example`, and never committed — the repository is public.
 
 ```dotenv
-MEDIA_DISK=s3
+FILM_DISK=s3
 
 AWS_ACCESS_KEY_ID=<from IT>
 AWS_SECRET_ACCESS_KEY=<from IT>
@@ -53,28 +53,23 @@ These could not be verified locally, because they need a live bucket:
 3. **Public reads.** Confirm a film plays from `AWS_URL` in a logged-out browser.
    If it 403s, the bucket's custom domain binding is not public.
 
-## Logos need attention before the switch
+## Logos stay local, films go to R2
 
-`portfolio:sync-logos` reads `Storage::disk('public')` directly rather than the
-media disk, and the 17 WebP logos are committed under `storage/app/public/logos`.
-So after `MEDIA_DISK=s3`:
+Logos and films use separate disks because they behave differently:
 
-- `PortfolioClient::logoUrl()` builds an R2 URL, but the file only exists on
-  local disk, so tiles render broken images.
-- Running `portfolio:sync-logos` against R2 is worse: it finds no files in the
-  bucket and clears every `logo_path` it has, wiping all 17 assignments.
+- **Logos** (`LOGO_DISK`, default `public`) are a few KB each, static, and
+  committed under `storage/app/public/logos`. They ship with a deploy, so there
+  is nothing to upload and no reason to pay for object storage.
+- **Films** (`FILM_DISK`) are large and uploaded through the studio, so these
+  are what R2 is for.
 
-**Do not run `portfolio:sync-logos` after switching `MEDIA_DISK` to s3** until
-this is resolved. Either:
-
-1. Upload `storage/app/public/logos/` into the bucket first, then point the
-   command at `config('filesystems.media')`; or
-2. Keep logos on the local/public disk deliberately - they are small, static and
-   version-controlled - and move only films to R2.
-
-Option 2 is the smaller change and is probably right: logos are a few KB each and
-ship with the repository, while films are the reason we want R2 at all. That
-would mean giving films their own disk config rather than one shared media disk.
+`portfolio:sync-logos` reads `config('filesystems.logos')` rather than a
+hardcoded disk. It also refuses to run when a **remote** logo disk turns up
+empty, because that almost always means the bucket or credentials are wrong,
+and the command clears the logo path of every client it cannot find a file for
+- which would wipe all 17 assignments. Pass `--force` to override. On a local
+disk the old behaviour is unchanged: an empty folder really does mean the
+logos were deleted.
 
 ## Temporary upload cleanup
 
@@ -87,6 +82,6 @@ php artisan livewire:configure-s3-upload-cleanup
 
 ## Local development
 
-Leave `MEDIA_DISK=public` and `LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK` unset.
+Leave `LOGO_DISK` and `FILM_DISK` on `public`, and `LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK` unset.
 Files go to `storage/app/public`, served through the `public/storage` symlink
 created by `php artisan storage:link`.

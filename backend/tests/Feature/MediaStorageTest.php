@@ -10,11 +10,11 @@ use Livewire\Livewire;
 
 /**
  * These prove the app is genuinely disk-agnostic: the same code paths must
- * work when MEDIA_DISK points at object storage instead of local disk.
+ * work when the disks point at object storage instead of local disk.
  * They run against a faked s3 disk, so no real R2 credentials are needed.
  */
 beforeEach(function () {
-    config(['filesystems.media' => 's3']);
+    config(['filesystems.films' => 's3', 'filesystems.logos' => 's3']);
     Storage::fake('s3');
 
     $this->actingAs(User::factory()->create());
@@ -44,7 +44,7 @@ function useRealS3Disk(): void
     ]]);
 }
 
-it('stores an uploaded film on the s3 disk when MEDIA_DISK is s3', function () {
+it('stores an uploaded film on the s3 disk when FILM_DISK is s3', function () {
     Livewire::test('admin.client-films', ['client' => $this->client])
         ->call('newFilm')
         ->set('title', 'Brand Anthem')

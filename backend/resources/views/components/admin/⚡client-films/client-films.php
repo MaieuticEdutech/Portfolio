@@ -162,7 +162,7 @@ new class extends Component
 
     private function disk(): string
     {
-        return config('filesystems.media');
+        return config('filesystems.films');
     }
 
     private function directory(string $kind): string
