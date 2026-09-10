@@ -12,6 +12,8 @@ Route::get('/', function () {
     return view('portfolio', [
         'totalClients' => $clients->count(),
         'marqueeClients' => $clients,
+        // The reel shows a curated front section rather than all 45.
+        'galleryClients' => $clients->take(8),
         // The showreel is simply the first film with footage uploaded. Until one
         // exists the hero falls back to a generated panel rather than a gap.
         'heroFilm' => PortfolioVideo::query()
