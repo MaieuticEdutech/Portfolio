@@ -52,6 +52,7 @@ new class extends Component
             // LIKE is case-sensitive on Postgres and would match nothing.
             ->when(filled($this->search), fn ($q) => $q->whereLike('name', '%'.trim($this->search).'%', caseSensitive: false))
             ->withCount('videos')
+            ->with('previewVideo')
             ->inGridOrder()
             ->get();
     }

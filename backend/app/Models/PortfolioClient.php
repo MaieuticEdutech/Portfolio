@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -65,6 +66,19 @@ class PortfolioClient extends Model
     public function videos(): HasMany
     {
         return $this->hasMany(PortfolioVideo::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * The film a tile plays on hover: the first with footage actually uploaded.
+     * Pasted YouTube/Vimeo links are excluded because a <video> tag cannot
+     * play them, and a client with no upload simply gets no preview.
+     */
+    public function previewVideo(): HasOne
+    {
+        return $this->hasOne(PortfolioVideo::class)->ofMany(
+            ['sort_order' => 'min', 'id' => 'min'],
+            fn (Builder $query) => $query->whereNotNull('video_path')
+        );
     }
 
     public function scopePublished(Builder $query): Builder
