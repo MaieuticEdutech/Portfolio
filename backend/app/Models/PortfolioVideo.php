@@ -36,7 +36,7 @@ class PortfolioVideo extends Model
     public function source(): ?string
     {
         if ($this->video_path) {
-            return Storage::disk(config('filesystems.media'))->url($this->video_path);
+            return Storage::disk(config('filesystems.films'))->url($this->video_path);
         }
 
         return $this->video_url;
@@ -45,7 +45,7 @@ class PortfolioVideo extends Model
     public function thumbnailUrl(): ?string
     {
         return $this->thumbnail_path
-            ? Storage::disk(config('filesystems.media'))->url($this->thumbnail_path)
+            ? Storage::disk(config('filesystems.films'))->url($this->thumbnail_path)
             : null;
     }
 

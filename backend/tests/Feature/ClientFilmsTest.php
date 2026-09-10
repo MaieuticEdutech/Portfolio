@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function () {
-    Storage::fake(config('filesystems.media'));
+    Storage::fake(config('filesystems.films'));
     $this->actingAs(User::factory()->create());
     $this->client = PortfolioClient::factory()->create(['name' => 'Strides Ltd']);
 });
@@ -35,7 +35,7 @@ it('uploads a film and stores it on the media disk', function () {
         ->and($video->video_path)->toContain('portfolio/films/strides-ltd')
         ->and($video->isUploaded())->toBeTrue();
 
-    Storage::disk(config('filesystems.media'))->assertExists($video->video_path);
+    Storage::disk(config('filesystems.films'))->assertExists($video->video_path);
 });
 
 it('accepts a pasted link instead of a file', function () {
@@ -97,8 +97,8 @@ it('deletes the old file when footage is replaced', function () {
     $second = $video->fresh()->video_path;
 
     expect($second)->not->toBe($first);
-    Storage::disk(config('filesystems.media'))->assertMissing($first);
-    Storage::disk(config('filesystems.media'))->assertExists($second);
+    Storage::disk(config('filesystems.films'))->assertMissing($first);
+    Storage::disk(config('filesystems.films'))->assertExists($second);
 });
 
 it('clears footage but keeps the slot', function () {
@@ -117,7 +117,7 @@ it('clears footage but keeps the slot', function () {
     expect($video->fresh())->not->toBeNull()
         ->and($video->fresh()->isPending())->toBeTrue();
 
-    Storage::disk(config('filesystems.media'))->assertMissing($path);
+    Storage::disk(config('filesystems.films'))->assertMissing($path);
 });
 
 it('deletes a film and its file', function () {
@@ -134,7 +134,7 @@ it('deletes a film and its file', function () {
         ->call('deleteFilm', $video->id);
 
     expect(PortfolioVideo::find($video->id))->toBeNull();
-    Storage::disk(config('filesystems.media'))->assertMissing($path);
+    Storage::disk(config('filesystems.films'))->assertMissing($path);
 });
 
 it('reorders films', function () {

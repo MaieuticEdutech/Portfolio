@@ -17,16 +17,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Media Disk
+    | Media Disks
     |--------------------------------------------------------------------------
     |
-    | Where client logos and films are stored. Local disk in development;
-    | set MEDIA_DISK=s3 with the Cloudflare R2 credentials to move it to
-    | object storage without touching application code.
+    | Logos and films are stored separately because they behave differently.
+    | Logos are small, static and committed to the repository, so they ship
+    | with a deploy and stay on the public disk. Films are large and uploaded
+    | through the studio, so they belong in object storage: set FILM_DISK=s3
+    | with the Cloudflare R2 credentials.
     |
     */
 
-    'media' => env('MEDIA_DISK', 'public'),
+    'logos' => env('LOGO_DISK', 'public'),
+
+    'films' => env('FILM_DISK', 'public'),
 
     /*
     |--------------------------------------------------------------------------
@@ -69,6 +73,16 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+
+            // Cloudflare R2 notes:
+            // - R2 has no ACLs, so visibility is deliberately left unset.
+            //   Public reads come from the bucket's custom domain binding.
+            // - The AWS SDK adds CRC32 checksums to every request by default
+            //   since 3.337. R2 rejects those, so they are only sent when the
+            //   API actually requires them.
+            'request_checksum_calculation' => env('AWS_REQUEST_CHECKSUM_CALCULATION', 'when_required'),
+            'response_checksum_validation' => env('AWS_RESPONSE_CHECKSUM_VALIDATION', 'when_required'),
+
             'throw' => false,
             'report' => false,
         ],

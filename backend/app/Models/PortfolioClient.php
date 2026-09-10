@@ -108,7 +108,7 @@ class PortfolioClient extends Model
     public function logoUrl(): ?string
     {
         return $this->logo_path
-            ? Storage::disk(config('filesystems.media'))->url($this->logo_path)
+            ? Storage::disk(config('filesystems.logos'))->url($this->logo_path)
             : null;
     }
 
