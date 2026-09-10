@@ -19,7 +19,9 @@
                             @foreach ($row['clients'] as $client)
                                 <div class="flex h-16 w-44 shrink-0 items-center justify-center rounded-2xl bg-white/[0.035] px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ring-1 ring-white/[0.06] sm:h-20 sm:w-52">
                                     @if ($client->logoUrl())
-                                        <img src="{{ $client->logoUrl() }}" alt="" loading="lazy" class="max-h-8 w-auto max-w-full opacity-50 brightness-0 invert sm:max-h-10">
+                                        <span class="flex h-10 max-w-full items-center justify-center overflow-hidden rounded-lg bg-white/85 px-2 py-1 sm:h-12 sm:px-2.5">
+                                            <img src="{{ $client->logoUrl() }}" alt="" loading="lazy" class="h-full w-auto max-w-full object-contain">
+                                        </span>
                                     @else
                                         <span class="truncate text-center text-xs font-semibold tracking-wide text-white/25">{{ $client->name }}</span>
                                     @endif
