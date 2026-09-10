@@ -55,8 +55,9 @@
             </button>
         </div>
     @else
-        {{-- grid-flow-dense backfills the gaps big tiles leave, so the wall reads as one solid mosaic --}}
-        <div class="grid auto-rows-[7.5rem] grid-flow-dense grid-cols-2 gap-3 sm:auto-rows-[8.5rem] sm:grid-cols-4 sm:gap-4 lg:grid-cols-6">
+        {{-- Multi-column rather than grid: tiles flow at their natural height, so
+             columns stagger instead of locking to a row and the wall can breathe --}}
+        <div class="columns-1 gap-5 sm:columns-2 sm:gap-8 lg:columns-3 lg:gap-10">
             @foreach ($this->clients as $index => $client)
                 @php
                     // Sector colour lives in the top-left corner and settles into the shared
@@ -70,10 +71,12 @@
                     $isBig = $client->tile_size === 'big';
                     $isMed = $client->tile_size === 'med';
                     $isEducational = $client->category === 'educational';
+                    // Weight now reads as height rather than area, so every tile gets the
+                    // same width and the important ones simply stand taller.
                     $span = match ($client->tile_size) {
-                        'big' => 'col-span-2 row-span-2 rounded-3xl',
-                        'med' => 'col-span-2 row-span-1 rounded-2xl',
-                        default => 'col-span-1 row-span-1 rounded-2xl',
+                        'big' => 'aspect-[4/5] rounded-3xl',
+                        'med' => 'aspect-square rounded-2xl',
+                        default => 'aspect-[5/4] rounded-2xl',
                     };
                     $initial = Str::upper(Str::substr($client->name, 0, 1));
                     $preview = $client->previewVideo;
@@ -89,7 +92,7 @@
                         x-on:mouseenter="if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) $refs.preview?.play()"
                         x-on:mouseleave="if ($refs.preview) { $refs.preview.pause(); $refs.preview.currentTime = 0; }"
                     @endif
-                    class="animate-tile-in group relative isolate overflow-hidden text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:ring-white/40 focus:outline-none focus-visible:ring-2 {{ $span }}
+                    class="animate-tile-in group relative isolate mb-5 block w-full break-inside-avoid overflow-hidden text-left sm:mb-8 lg:mb-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:ring-white/40 focus:outline-none focus-visible:ring-2 {{ $span }}
                         {{ $isEducational
                             ? 'hover:shadow-[0_28px_60px_-18px_rgba(21,217,161,0.55)] focus-visible:ring-brand-mint'
                             : 'hover:shadow-[0_28px_60px_-18px_rgba(248,132,126,0.55)] focus-visible:ring-brand-coral' }}"
@@ -119,7 +122,7 @@
 
                     {{-- Watermark monogram gives every tile its own signature while logos are pending --}}
                     @unless ($client->logoUrl())
-                        <span aria-hidden="true" class="pointer-events-none absolute -bottom-3 -right-1 select-none font-bold leading-none tracking-tighter text-white/[0.08] transition duration-500 group-hover:-translate-y-2 group-hover:text-white/[0.14] {{ $isBig ? 'text-[9rem] sm:text-[13rem]' : ($isMed ? 'text-[6.5rem] sm:text-[8rem]' : 'text-[5.5rem] sm:text-[6.5rem]') }}">
+                        <span aria-hidden="true" class="pointer-events-none absolute -bottom-3 -right-1 select-none font-bold leading-none tracking-tighter text-white/[0.08] transition duration-500 group-hover:-translate-y-2 group-hover:text-white/[0.14] {{ $isBig ? 'text-[10rem] sm:text-[13rem]' : ($isMed ? 'text-[8rem] sm:text-[11rem]' : 'text-[7rem] sm:text-[9rem]') }}">
                             {{ $initial }}
                         </span>
                     @endunless
@@ -146,12 +149,12 @@
                                     src="{{ $client->logoUrl() }}"
                                     alt="{{ $client->name }} logo"
                                     loading="lazy"
-                                    class="w-auto max-h-full object-contain object-left-bottom opacity-90 brightness-0 invert drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition duration-300 group-hover:opacity-100 {{ $isBig ? 'h-12 max-w-[70%] sm:h-16' : 'h-6 max-w-[75%] sm:h-8' }}"
+                                    class="w-auto max-h-full object-contain object-left-bottom opacity-90 brightness-0 invert drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition duration-300 group-hover:opacity-100 {{ $isBig ? 'h-14 max-w-[70%] sm:h-20' : 'h-10 max-w-[75%] sm:h-12' }}"
                                 >
                             </span>
                         @endif
 
-                        <span class="text-balance font-bold leading-[1.05] tracking-tight text-white drop-shadow-md {{ $isBig ? 'text-2xl sm:text-4xl' : ($isMed ? 'text-base sm:text-xl' : 'text-sm sm:text-base') }}">
+                        <span class="text-balance font-bold leading-[1.05] tracking-tight text-white drop-shadow-md {{ $isBig ? 'text-2xl sm:text-3xl' : ($isMed ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl') }}">
                             {{ $client->name }}
                         </span>
 
