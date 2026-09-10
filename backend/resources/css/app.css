@@ -46,7 +46,11 @@
     }
 
     .animate-tile-in {
-        animation: tile-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+        /* backwards, not both: `both` keeps the final `transform: none` applied
+           forever, and an animation's filled value outranks inline styles, so it
+           silently overrode the hover lean. `backwards` still holds the opening
+           frame through animation-delay, which is what drives the stagger. */
+        animation: tile-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
     }
 
     /* Fine film grain laid over the tile gradients so they read as printed
