@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PortfolioClient extends Model
@@ -92,7 +93,9 @@ class PortfolioClient extends Model
 
     public function logoUrl(): ?string
     {
-        return $this->logo_path ? asset('storage/'.$this->logo_path) : null;
+        return $this->logo_path
+            ? Storage::disk(config('filesystems.media'))->url($this->logo_path)
+            : null;
     }
 
     /**

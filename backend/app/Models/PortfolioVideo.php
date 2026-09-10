@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class PortfolioVideo extends Model
 {
@@ -35,7 +36,7 @@ class PortfolioVideo extends Model
     public function source(): ?string
     {
         if ($this->video_path) {
-            return asset('storage/'.$this->video_path);
+            return Storage::disk(config('filesystems.media'))->url($this->video_path);
         }
 
         return $this->video_url;
@@ -43,7 +44,9 @@ class PortfolioVideo extends Model
 
     public function thumbnailUrl(): ?string
     {
-        return $this->thumbnail_path ? asset('storage/'.$this->thumbnail_path) : null;
+        return $this->thumbnail_path
+            ? Storage::disk(config('filesystems.media'))->url($this->thumbnail_path)
+            : null;
     }
 
     public function isUploaded(): bool
