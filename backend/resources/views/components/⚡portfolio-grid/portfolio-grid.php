@@ -48,7 +48,9 @@ new class extends Component
         return PortfolioClient::query()
             ->published()
             ->category($this->category)
-            ->when(filled($this->search), fn ($q) => $q->where('name', 'like', '%'.trim($this->search).'%'))
+            // whereLike keeps this case-insensitive on every driver; a plain
+            // LIKE is case-sensitive on Postgres and would match nothing.
+            ->when(filled($this->search), fn ($q) => $q->whereLike('name', '%'.trim($this->search).'%', caseSensitive: false))
             ->withCount('videos')
             ->inGridOrder()
             ->get();
