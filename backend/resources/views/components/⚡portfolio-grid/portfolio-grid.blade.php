@@ -93,24 +93,25 @@
                          tracked exactly, so the surface appears to give under the pointer
                          instead of snapping to it. --}}
                     x-data="{
-                        rx: 0, ry: 0, lift: 0,
+                        rx: 0, ry: 0, lift: 0, grow: 1,
                         calm() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches },
                         lean(e) {
                             if (this.calm()) return
-                            const r = $el.getBoundingClientRect()
-                            this.ry = (((e.clientX - r.left) / r.width) - 0.5) * 9
-                            this.rx = -(((e.clientY - r.top) / r.height) - 0.5) * 9
-                            this.lift = -8
+                            const r = this.$el.getBoundingClientRect()
+                            this.ry = (((e.clientX - r.left) / r.width) - 0.5) * 18
+                            this.rx = -(((e.clientY - r.top) / r.height) - 0.5) * 18
+                            this.lift = -10
+                            this.grow = 1.03
                         },
-                        settle() { this.rx = this.ry = this.lift = 0 },
+                        settle() { this.rx = this.ry = this.lift = 0; this.grow = 1 },
                     }"
                     x-on:pointermove="lean($event)"
                     x-on:pointerenter="if (!calm()) $refs.preview?.play()"
                     x-on:pointerleave="settle(); if ($refs.preview) { $refs.preview.pause(); $refs.preview.currentTime = 0 }"
                     {{-- Object syntax so Alpine sets only transform and leaves the
                          inline animation-delay driving the entry stagger intact --}}
-                    x-bind:style="{ transform: `perspective(1100px) rotateX(${rx}deg) rotateY(${ry}deg) translate3d(0,${lift}px,0)` }"
-                    class="animate-tile-in group relative isolate block w-full [transform-style:preserve-3d] overflow-hidden text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-white/10 transition-[transform,box-shadow,--tw-ring-color] duration-500 [transition-timing-function:cubic-bezier(.25,.46,.45,.94)] hover:ring-white/40 focus:outline-none focus-visible:ring-2 {{ $span }}
+                    x-bind:style="{ transform: `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translate3d(0,${lift}px,0) scale(${grow})` }"
+                    class="animate-tile-in group relative isolate block w-full [transform-style:preserve-3d] overflow-hidden text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-white/10 transition-[transform,box-shadow] duration-500 [transition-timing-function:cubic-bezier(.25,.46,.45,.94)] hover:ring-white/40 focus:outline-none focus-visible:ring-2 {{ $span }}
                         {{ $isEducational
                             ? 'hover:shadow-[0_28px_60px_-18px_rgba(21,217,161,0.55)] focus-visible:ring-brand-mint'
                             : 'hover:shadow-[0_28px_60px_-18px_rgba(248,132,126,0.55)] focus-visible:ring-brand-coral' }}"
