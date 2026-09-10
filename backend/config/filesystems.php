@@ -69,6 +69,16 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+
+            // Cloudflare R2 notes:
+            // - R2 has no ACLs, so visibility is deliberately left unset.
+            //   Public reads come from the bucket's custom domain binding.
+            // - The AWS SDK adds CRC32 checksums to every request by default
+            //   since 3.337. R2 rejects those, so they are only sent when the
+            //   API actually requires them.
+            'request_checksum_calculation' => env('AWS_REQUEST_CHECKSUM_CALCULATION', 'when_required'),
+            'response_checksum_validation' => env('AWS_RESPONSE_CHECKSUM_VALIDATION', 'when_required'),
+
             'throw' => false,
             'report' => false,
         ],
