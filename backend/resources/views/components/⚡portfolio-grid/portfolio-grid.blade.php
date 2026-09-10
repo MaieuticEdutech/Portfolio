@@ -55,9 +55,11 @@
             </button>
         </div>
     @else
-        {{-- Multi-column rather than grid: tiles flow at their natural height, so
-             columns stagger instead of locking to a row and the wall can breathe --}}
-        <div class="columns-1 gap-5 sm:columns-2 sm:gap-8 lg:columns-3 lg:gap-10">
+        {{-- Grid, not multi-column: column balancing was opening voids mid-column.
+             items-start keeps every row flush at the top while tiles keep their
+             own height, and the gutter is set as a share of the tile width
+             rather than a token size, which is what actually reads as space. --}}
+        <div class="grid grid-cols-1 items-start gap-y-14 sm:grid-cols-2 sm:gap-x-12 sm:gap-y-20 lg:grid-cols-3 lg:gap-x-24 lg:gap-y-28">
             @foreach ($this->clients as $index => $client)
                 @php
                     // Sector colour lives in the top-left corner and settles into the shared
@@ -87,12 +89,28 @@
                     wire:key="client-{{ $client->id }}"
                     wire:click="select({{ $client->id }})"
                     style="animation-delay: {{ min($index, 24) * 25 }}ms"
-                    @if ($preview)
-                        x-data
-                        x-on:mouseenter="if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) $refs.preview?.play()"
-                        x-on:mouseleave="if ($refs.preview) { $refs.preview.pause(); $refs.preview.currentTime = 0; }"
-                    @endif
-                    class="animate-tile-in group relative isolate mb-5 block w-full break-inside-avoid overflow-hidden text-left sm:mb-8 lg:mb-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:ring-white/40 focus:outline-none focus-visible:ring-2 {{ $span }}
+                    {{-- The tile leans towards the cursor. Transform is smoothed rather than
+                         tracked exactly, so the surface appears to give under the pointer
+                         instead of snapping to it. --}}
+                    x-data="{
+                        rx: 0, ry: 0, lift: 0,
+                        calm() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches },
+                        lean(e) {
+                            if (this.calm()) return
+                            const r = $el.getBoundingClientRect()
+                            this.ry = (((e.clientX - r.left) / r.width) - 0.5) * 9
+                            this.rx = -(((e.clientY - r.top) / r.height) - 0.5) * 9
+                            this.lift = -8
+                        },
+                        settle() { this.rx = this.ry = this.lift = 0 },
+                    }"
+                    x-on:pointermove="lean($event)"
+                    x-on:pointerenter="if (!calm()) $refs.preview?.play()"
+                    x-on:pointerleave="settle(); if ($refs.preview) { $refs.preview.pause(); $refs.preview.currentTime = 0 }"
+                    {{-- Object syntax so Alpine sets only transform and leaves the
+                         inline animation-delay driving the entry stagger intact --}}
+                    x-bind:style="{ transform: `perspective(1100px) rotateX(${rx}deg) rotateY(${ry}deg) translate3d(0,${lift}px,0)` }"
+                    class="animate-tile-in group relative isolate block w-full [transform-style:preserve-3d] overflow-hidden text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-white/10 transition-[transform,box-shadow,--tw-ring-color] duration-500 [transition-timing-function:cubic-bezier(.25,.46,.45,.94)] hover:ring-white/40 focus:outline-none focus-visible:ring-2 {{ $span }}
                         {{ $isEducational
                             ? 'hover:shadow-[0_28px_60px_-18px_rgba(21,217,161,0.55)] focus-visible:ring-brand-mint'
                             : 'hover:shadow-[0_28px_60px_-18px_rgba(248,132,126,0.55)] focus-visible:ring-brand-coral' }}"
