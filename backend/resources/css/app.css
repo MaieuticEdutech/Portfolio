@@ -69,53 +69,6 @@
     .hero-drift-two   { animation: hero-drift 23s ease-in-out -7s infinite reverse; }
     .hero-drift-three { animation: hero-drift 27s ease-in-out -13s infinite; }
 
-    /* Showreel placeholder: a strip of film advancing behind the wash. Frame
-       edges and sprocket holes are repeating gradients, so nothing ships. */
-    @keyframes hero-advance {
-        from { background-position: 0 0; }
-        to   { background-position: -240px 0; }
-    }
-
-    @keyframes hero-sweep {
-        0%   { transform: translateX(-120%) skewX(-12deg); }
-        60%  { transform: translateX(220%) skewX(-12deg); }
-        100% { transform: translateX(220%) skewX(-12deg); }
-    }
-
-    @keyframes hero-pulse {
-        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.35); }
-        70%      { transform: scale(1.06); box-shadow: 0 0 0 18px rgba(255, 255, 255, 0); }
-    }
-
-    .hero-frames {
-        background-image: repeating-linear-gradient(
-            90deg,
-            rgba(0, 0, 0, 0.28) 0 2px,
-            transparent 2px 118px,
-            rgba(255, 255, 255, 0.07) 118px 120px
-        );
-        background-size: 240px 100%;
-        animation: hero-advance 6s linear infinite;
-    }
-
-    .hero-sprockets {
-        background-image: repeating-linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0.55) 0 14px,
-            transparent 14px 40px
-        );
-        background-size: 240px 100%;
-        animation: hero-advance 6s linear infinite;
-        mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
-    }
-
-    .hero-sheen {
-        background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.22), transparent);
-        animation: hero-sweep 7s ease-in-out infinite;
-    }
-
-    .hero-pulse { animation: hero-pulse 2.8s ease-out infinite; }
-
     /* Fine film grain laid over the tile gradients so they read as printed
        posters rather than flat CSS fills. Pure SVG turbulence — no asset. */
     .tile-grain {
@@ -144,9 +97,6 @@
         .animate-marquee-reverse,
         .hero-drift-one,
         .hero-drift-two,
-        .hero-drift-three,
-        .hero-sprockets,
-        .hero-sheen,
-        .hero-pulse { animation: none; }
+        .hero-drift-three { animation: none; }
     }
 }

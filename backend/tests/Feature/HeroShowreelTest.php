@@ -15,14 +15,16 @@ it('plays the first uploaded film as the showreel', function () {
         ->assertSee('playsinline', false);
 });
 
-it('falls back to the generated panel when nothing is uploaded', function () {
+it('shows no panel at all when nothing is uploaded', function () {
     PortfolioClient::factory()->create();
 
+    // A placeholder here would advertise having nothing to show, so the
+    // headline simply takes the full measure instead.
     $this->get('/')
         ->assertOk()
-        ->assertSee('Showreel')
-        ->assertSee('Upload a film in the studio')
-        ->assertDontSee('Now showing');
+        ->assertDontSee('Now showing')
+        ->assertDontSee('Showreel')
+        ->assertDontSee('<video', false);
 });
 
 it('will not pull a showreel from an unpublished client', function () {
@@ -43,35 +45,19 @@ it('ignores films that are only pasted links', function () {
     $this->get('/')->assertOk()->assertDontSee('Now showing');
 });
 
-it('keeps hero motion out of the way of reduced-motion users', function () {
+it('keeps the drifting aurora behind the reduced-motion opt-out', function () {
     PortfolioClient::factory()->create();
 
-    // The stylesheet, not the markup, carries the opt-out; assert the hooks the
-    // reduced-motion block targets are the ones actually rendered.
-    $this->get('/')
-        ->assertSee('hero-drift-one', false)
-        ->assertSee('hero-sprockets', false)
-        // The loop is hidden for reduced motion, uncovering the still gradient.
-        ->assertSee('motion-reduce:hidden', false);
+    $this->get('/')->assertSee('hero-drift-one', false);
+
+    // The stylesheet carries the opt-out; assert it still names what renders.
+    expect(file_get_contents(resource_path('css/app.css')))
+        ->toContain('prefers-reduced-motion')
+        ->toContain('.hero-drift-one');
 });
 
-it('backs the placeholder with the generated loop', function () {
+it('gives the headline the full measure with no film to show', function () {
     PortfolioClient::factory()->create();
 
-    $this->get('/')->assertSee('media/showreel-loop.webp', false);
-
-    expect(public_path('media/showreel-loop.webp'))->toBeReadableFile();
-});
-
-it('ships the loop as a genuinely animated file', function () {
-    $bytes = file_get_contents(public_path('media/showreel-loop.webp'));
-
-    // GD cannot decode animated WebP, so read the container: an animation
-    // carries an ANIM chunk and one ANMF chunk per frame. A still file has
-    // neither, which is the regression worth catching if the asset is ever
-    // re-exported by hand.
-    expect(substr($bytes, 0, 4))->toBe('RIFF')
-        ->and(substr($bytes, 8, 4))->toBe('WEBP')
-        ->and(str_contains($bytes, 'ANIM'))->toBeTrue()
-        ->and(substr_count($bytes, 'ANMF'))->toBeGreaterThan(30);
+    $this->get('/')->assertSee('lg:text-8xl', false);
 });
