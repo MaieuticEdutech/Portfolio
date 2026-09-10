@@ -16,8 +16,8 @@ class DatabaseSeeder extends Seeder
         // exist anywhere reachable. Real accounts: `php artisan studio:user`.
         if (app()->environment('local', 'testing')) {
             User::firstOrCreate(
-                ['email' => 'test@example.com'],
-                User::factory()->make(['name' => 'Test User'])->getAttributes()
+                ['email' => 'studio@example.test'],
+                ['name' => 'Studio Demo', 'password' => 'password'],
             );
         }
 
