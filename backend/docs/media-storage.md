@@ -53,6 +53,29 @@ These could not be verified locally, because they need a live bucket:
 3. **Public reads.** Confirm a film plays from `AWS_URL` in a logged-out browser.
    If it 403s, the bucket's custom domain binding is not public.
 
+## Logos need attention before the switch
+
+`portfolio:sync-logos` reads `Storage::disk('public')` directly rather than the
+media disk, and the 17 WebP logos are committed under `storage/app/public/logos`.
+So after `MEDIA_DISK=s3`:
+
+- `PortfolioClient::logoUrl()` builds an R2 URL, but the file only exists on
+  local disk, so tiles render broken images.
+- Running `portfolio:sync-logos` against R2 is worse: it finds no files in the
+  bucket and clears every `logo_path` it has, wiping all 17 assignments.
+
+**Do not run `portfolio:sync-logos` after switching `MEDIA_DISK` to s3** until
+this is resolved. Either:
+
+1. Upload `storage/app/public/logos/` into the bucket first, then point the
+   command at `config('filesystems.media')`; or
+2. Keep logos on the local/public disk deliberately - they are small, static and
+   version-controlled - and move only films to R2.
+
+Option 2 is the smaller change and is probably right: logos are a few KB each and
+ship with the repository, while films are the reason we want R2 at all. That
+would mean giving films their own disk config rather than one shared media disk.
+
 ## Temporary upload cleanup
 
 Direct uploads land in `livewire-tmp/` before being moved into place.
