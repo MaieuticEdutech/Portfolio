@@ -11,7 +11,7 @@
 
         @livewireStyles
     </head>
-    <body class="min-h-screen bg-ink-900 antialiased">
+    <body class="min-h-screen bg-white antialiased">
         {{ $slot }}
 
         @livewireScripts

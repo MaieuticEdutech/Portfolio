@@ -14,7 +14,8 @@
         {{-- Kept here rather than in app.css so studio work never touches the public stylesheet. --}}
         <style>[x-cloak] { display: none !important; }</style>
     </head>
-    <body class="min-h-screen bg-ink-900 antialiased">
+    {{-- The base stylesheet is light for the public site, so the studio restates both ground and ink --}}
+    <body class="min-h-screen bg-ink-900 text-white antialiased">
         @auth
             <header class="border-b border-white/5 bg-ink-800">
                 <div class="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">

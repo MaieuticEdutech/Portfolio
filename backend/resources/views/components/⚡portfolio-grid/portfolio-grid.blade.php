@@ -8,7 +8,7 @@
 
 <div class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
     {{-- Filter bar --}}
-    <div class="sticky top-0 z-20 -mx-4 mb-8 border-b border-white/5 bg-ink-900/85 px-4 py-4 backdrop-blur-lg sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+    <div class="sticky top-0 z-20 -mx-4 mb-12 border-b border-ink-900/10 bg-white/85 px-4 py-4 backdrop-blur-lg sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <div class="flex flex-wrap items-center gap-3">
             <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by sector">
                 @foreach ($filters as $key => $label)
@@ -18,7 +18,7 @@
                         aria-pressed="{{ $category === $key ? 'true' : 'false' }}"
                         class="group flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition
                             {{ match (true) {
-                                $category !== $key => 'border-white/10 bg-white/5 text-white/60 hover:border-white/25 hover:text-white',
+                                $category !== $key => 'border-ink-900/12 bg-white text-ink-900/55 hover:border-ink-900/30 hover:text-ink-900',
                                 $key === 'corporate' => 'border-brand-coral/60 bg-brand-coral/15 text-brand-coral shadow-[0_0_24px_-6px_rgba(248,132,126,0.6)]',
                                 default => 'border-brand-mint/60 bg-brand-mint/15 text-brand-mint shadow-[0_0_24px_-6px_rgba(21,217,161,0.6)]',
                             } }}"
@@ -32,7 +32,7 @@
             </div>
 
             <div class="relative ml-auto w-full sm:w-64">
-                <svg class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-white/30" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <svg class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-900/30" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" />
                 </svg>
                 <input
@@ -40,7 +40,7 @@
                     wire:model.live.debounce.300ms="search"
                     placeholder="Search clients"
                     aria-label="Search clients"
-                    class="w-full rounded-full border border-white/10 bg-white/5 py-2 pl-9 pr-4 text-sm text-white placeholder-white/30 transition focus:border-brand-mint/50 focus:bg-white/10 focus:outline-none"
+                    class="w-full rounded-full border border-ink-900/12 bg-white py-2 pl-9 pr-4 text-sm text-ink-900 placeholder-ink-900/35 transition focus:border-brand-teal/50 focus:outline-none"
                 >
             </div>
         </div>
@@ -48,9 +48,9 @@
 
     {{-- Tile grid --}}
     @if ($this->clients->isEmpty())
-        <div class="rounded-2xl border border-dashed border-white/10 py-24 text-center">
-            <p class="text-lg text-white/70">No clients match &ldquo;{{ $search }}&rdquo;.</p>
-            <button type="button" wire:click="$set('search', '')" class="mt-3 text-sm text-brand-mint hover:underline">
+        <div class="rounded-2xl border border-dashed border-ink-900/15 py-24 text-center">
+            <p class="text-lg text-ink-900/70">No clients match &ldquo;{{ $search }}&rdquo;.</p>
+            <button type="button" wire:click="$set('search', '')" class="mt-3 text-sm text-brand-teal hover:underline">
                 Clear search
             </button>
         </div>
@@ -110,12 +110,17 @@
                     x-on:pointerleave="settle(); if ($refs.preview) { $refs.preview.pause(); $refs.preview.currentTime = 0 }"
                     {{-- Object syntax so Alpine sets only transform and leaves the
                          inline animation-delay driving the entry stagger intact --}}
-                    x-bind:style="{ transform: `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translate3d(0,${lift}px,0) scale(${grow})` }"
-                    class="animate-tile-in group relative isolate block w-full [transform-style:preserve-3d] overflow-hidden text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-white/10 transition-[transform,box-shadow] duration-500 [transition-timing-function:cubic-bezier(.25,.46,.45,.94)] hover:ring-white/40 focus:outline-none focus-visible:ring-2 {{ $span }}
-                        {{ $isEducational
-                            ? 'hover:shadow-[0_28px_60px_-18px_rgba(21,217,161,0.55)] focus-visible:ring-brand-mint'
-                            : 'hover:shadow-[0_28px_60px_-18px_rgba(248,132,126,0.55)] focus-visible:ring-brand-coral' }}"
+                    class="animate-tile-in group block w-full text-left focus:outline-none"
                 >
+                    {{-- Only the artwork leans. The caption below stays flat and aligned
+                         with its neighbours, which is what keeps each row readable. --}}
+                    <span
+                        x-bind:style="{ transform: `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translate3d(0,${lift}px,0) scale(${grow})` }"
+                        class="relative isolate block w-full [transform-style:preserve-3d] overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] ring-1 ring-ink-900/10 transition-[transform,box-shadow] duration-500 [transition-timing-function:cubic-bezier(.25,.46,.45,.94)] group-focus-visible:ring-2 {{ $span }}
+                            {{ $isEducational
+                                ? 'group-hover:shadow-[0_28px_60px_-18px_rgba(0,134,128,0.45)] group-focus-visible:ring-brand-teal'
+                                : 'group-hover:shadow-[0_28px_60px_-18px_rgba(163,16,9,0.35)] group-focus-visible:ring-brand-red' }}"
+                    >
                     {{-- Layered surface: brand gradient, a soft light source, film grain, then a vignette for legibility --}}
                     <span class="absolute inset-0 -z-10 transition-transform duration-700 ease-out group-hover:scale-105" style="background: {{ $gradient }}"></span>
                     <span class="absolute inset-0 -z-10 bg-[radial-gradient(120%_90%_at_0%_0%,rgba(255,255,255,0.18),transparent_55%)] mix-blend-soft-light"></span>
@@ -177,26 +182,32 @@
                             </span>
                         @endif
 
-                        <span class="text-balance font-bold leading-[1.05] tracking-tight text-white drop-shadow-md {{ $isBig ? 'text-2xl sm:text-3xl' : ($isMed ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl') }}">
+                    </span>
+                    </span>
+
+                    {{-- Name and meta sit outside the artwork, so the tile stays a clean
+                         plate and the captions form an even band across each row --}}
+                    <span class="mt-4 block">
+                        <span class="block text-balance font-bold leading-[1.15] tracking-tight text-ink-900 {{ $isBig ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl' }}">
                             {{ $client->name }}
                         </span>
 
-                        <span class="mt-1.5 flex items-center gap-2 text-[11px] text-white/70 transition duration-300 sm:text-xs {{ $isBig ? 'sm:mt-2 sm:text-sm' : 'translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-100' }}">
+                        <span class="mt-1.5 flex items-center gap-2 text-xs text-ink-900/50 sm:text-sm">
                             <span class="truncate">{{ $client->project_type }}</span>
                             @if ($client->year)
-                                <span aria-hidden="true" class="text-white/40">&middot;</span><span class="tabular-nums">{{ $client->year }}</span>
+                                <span aria-hidden="true" class="text-ink-900/25">&middot;</span><span class="tabular-nums">{{ $client->year }}</span>
                             @endif
-                            <span aria-hidden="true" class="ml-auto -translate-x-1 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100 {{ $isEducational ? 'text-brand-mint' : 'text-brand-coral' }}">&rarr;</span>
+                            <span aria-hidden="true" class="ml-auto -translate-x-1 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100 {{ $isEducational ? 'text-brand-teal' : 'text-brand-red' }}">&rarr;</span>
                         </span>
                     </span>
                 </button>
             @endforeach
         </div>
 
-        <p class="mt-10 flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-white/35">
-            <span class="h-px w-8 bg-white/10"></span>
+        <p class="mt-16 flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-ink-900/40">
+            <span class="h-px w-8 bg-ink-900/15"></span>
             Showing {{ $this->clients->count() }} of {{ $this->counts['all'] }} clients
-            <span class="h-px w-8 bg-white/10"></span>
+            <span class="h-px w-8 bg-ink-900/15"></span>
         </p>
     @endif
 
@@ -218,7 +229,7 @@
             x-on:keydown.escape.window="$wire.close()"
             x-on:click.self="$wire.close()"
         >
-            <div class="my-auto w-full max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-ink-800 shadow-2xl">
+            <div class="my-auto w-full max-w-4xl overflow-hidden rounded-3xl border border-ink-900/10 bg-white shadow-2xl">
                 <div class="relative px-6 py-8 sm:px-8" style="background: {{ $gradient }}">
                     <div class="absolute inset-0 bg-black/35"></div>
 
@@ -246,7 +257,7 @@
 
                 <div class="space-y-4 p-6 sm:p-8">
                     @forelse ($client->videos as $video)
-                        <div class="overflow-hidden rounded-2xl border border-white/10 bg-ink-700">
+                        <div class="overflow-hidden rounded-2xl border border-ink-900/10 bg-ink-900/[0.03]">
                             @if ($video->isUploaded())
                                 <video controls preload="none" class="aspect-video w-full bg-black" @if ($video->thumbnailUrl()) poster="{{ $video->thumbnailUrl() }}" @endif>
                                     <source src="{{ $video->source() }}">
@@ -254,11 +265,11 @@
                             @elseif ($embed = $video->embedUrl())
                                 <iframe src="{{ $embed }}" title="{{ $video->title }}" loading="lazy" allowfullscreen class="aspect-video w-full border-0 bg-black"></iframe>
                             @elseif ($video->source())
-                                <a href="{{ $video->source() }}" target="_blank" rel="noopener noreferrer" class="flex aspect-video w-full items-center justify-center bg-black/60 text-sm text-brand-mint hover:underline">
+                                <a href="{{ $video->source() }}" target="_blank" rel="noopener noreferrer" class="flex aspect-video w-full items-center justify-center bg-ink-900 text-sm text-brand-mint hover:underline">
                                     Watch on external site &rarr;
                                 </a>
                             @else
-                                <div class="flex aspect-video w-full flex-col items-center justify-center gap-2 bg-ink-800 text-white/40">
+                                <div class="flex aspect-video w-full flex-col items-center justify-center gap-2 bg-ink-900/5 text-ink-900/35">
                                     <svg class="size-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                                         <rect x="2" y="5" width="14" height="14" rx="3" /><path d="m16 12 6-3.5v7L16 12Z" stroke-linejoin="round" />
                                     </svg>
@@ -267,14 +278,14 @@
                             @endif
 
                             <div class="flex items-center justify-between gap-3 px-4 py-3">
-                                <p class="truncate text-sm font-medium text-white/90">{{ $video->title }}</p>
+                                <p class="truncate text-sm font-medium text-ink-900/90">{{ $video->title }}</p>
                                 @if ($video->duration_label)
-                                    <span class="shrink-0 text-xs tabular-nums text-white/40">{{ $video->duration_label }}</span>
+                                    <span class="shrink-0 text-xs tabular-nums text-ink-900/40">{{ $video->duration_label }}</span>
                                 @endif
                             </div>
                         </div>
                     @empty
-                        <p class="py-8 text-center text-sm text-white/50">No films published for this client yet.</p>
+                        <p class="py-8 text-center text-sm text-ink-900/50">No films published for this client yet.</p>
                     @endforelse
                 </div>
             </div>
