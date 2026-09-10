@@ -77,6 +77,9 @@
         </section>
     @endif
 
+    {{-- Scroll-driven reel: vertical scroll is mapped onto horizontal travel --}}
+    <x-horizontal-gallery :clients="$galleryClients" />
+
     <main class="pt-12">
         <livewire:portfolio-grid />
     </main>
