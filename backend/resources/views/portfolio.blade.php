@@ -90,7 +90,26 @@
         </section>
     @endif
 
-    <main class="pt-12">
+    {{-- The crew work the margins. On a wide screen there is roughly 300px of
+         empty page either side of the 1280px container, which is the space that
+         reads as dead; below xl there is none, so they are hidden. --}}
+    <main class="relative pt-12">
+        <div aria-hidden="true" class="pointer-events-none absolute inset-0 hidden xl:block">
+            <x-studio-figure
+                variant="camera"
+                class="absolute left-6 top-24 w-28 text-ink-900/25 2xl:left-16 2xl:w-32"
+            />
+            <x-studio-figure
+                variant="clapper"
+                :flip="true"
+                class="absolute right-6 top-[38rem] w-24 text-ink-900/20 2xl:right-16 2xl:w-28"
+            />
+            <x-studio-figure
+                variant="boom"
+                class="absolute bottom-64 left-8 w-24 text-ink-900/20 2xl:left-20 2xl:w-28"
+            />
+        </div>
+
         <livewire:portfolio-grid />
     </main>
 

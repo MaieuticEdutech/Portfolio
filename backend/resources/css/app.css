@@ -116,6 +116,69 @@
 
     .hero-pulse { animation: hero-pulse 2.8s ease-out infinite; }
 
+    /* Crew figures. Every limb rotates about its actual joint, so these read as
+       drawn characters working rather than a picture that slides around. All
+       transform-origins are in viewBox units, which needs transform-box. */
+    .figure-camera *,
+    .figure-clapper *,
+    .figure-boom * {
+        transform-box: view-box;
+    }
+
+    @keyframes fig-bob {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-3px); }
+    }
+
+    @keyframes fig-pan {
+        0%, 100% { transform: rotate(-9deg); }
+        50%      { transform: rotate(10deg); }
+    }
+
+    @keyframes fig-brace {
+        0%, 100% { transform: rotate(3deg); }
+        50%      { transform: rotate(-4deg); }
+    }
+
+    @keyframes fig-snap {
+        0%, 55%, 100% { transform: rotate(0deg); }
+        25%           { transform: rotate(-32deg); }
+        40%           { transform: rotate(2deg); }
+    }
+
+    @keyframes fig-lift {
+        0%, 100% { transform: rotate(0deg); }
+        50%      { transform: rotate(-7deg); }
+    }
+
+    @keyframes fig-sway {
+        0%, 100% { transform: rotate(-4deg); }
+        50%      { transform: rotate(5deg); }
+    }
+
+    @keyframes fig-step {
+        0%, 100% { transform: rotate(4deg); }
+        50%      { transform: rotate(-5deg); }
+    }
+
+    .figure-bob { animation: fig-bob 3.2s ease-in-out infinite; transform-origin: 60px 120px; }
+
+    .figure-leg-back  { animation: fig-step 3.2s ease-in-out infinite; transform-origin: 60px 96px; }
+    .figure-leg-front { animation: fig-step 3.2s ease-in-out infinite reverse; transform-origin: 60px 96px; }
+
+    /* Camera operator: front arm pans the rig, back arm braces against it. */
+    .figure-camera .figure-arm-front { animation: fig-pan 4.4s ease-in-out infinite; transform-origin: 60px 58px; }
+    .figure-camera .figure-arm-back  { animation: fig-brace 4.4s ease-in-out infinite; transform-origin: 60px 58px; }
+
+    /* Clapper: arm holds steady, the board's top bar snaps shut. */
+    .figure-clapper .figure-arm-front { animation: fig-lift 2.6s ease-in-out infinite; transform-origin: 60px 58px; }
+    .figure-clapper .figure-clapper-arm { animation: fig-snap 2.6s cubic-bezier(.3, 1.6, .5, 1) infinite; transform-origin: 80px 60px; }
+
+    /* Boom operator: both arms up, pole swaying overhead. */
+    .figure-boom .figure-arm-front,
+    .figure-boom .figure-arm-back { animation: fig-lift 4s ease-in-out infinite; transform-origin: 60px 58px; }
+    .figure-boom .figure-prop-boom { animation: fig-sway 4s ease-in-out infinite; transform-origin: 92px 24px; }
+
     /* Fine film grain laid over the tile gradients so they read as printed
        posters rather than flat CSS fills. Pure SVG turbulence — no asset. */
     .tile-grain {
@@ -148,6 +211,13 @@
         .hero-frames,
         .hero-sprockets,
         .hero-sheen,
-        .hero-pulse { animation: none; }
+        .hero-pulse,
+        .figure-bob,
+        .figure-leg-back,
+        .figure-leg-front,
+        [class*='figure-'] .figure-arm-front,
+        [class*='figure-'] .figure-arm-back,
+        .figure-clapper .figure-clapper-arm,
+        .figure-boom .figure-prop-boom { animation: none; }
     }
 }
