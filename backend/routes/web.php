@@ -23,6 +23,14 @@ Route::get('/', function () {
     ]);
 })->name('portfolio');
 
+// Interaction lab: one isolated card for verifying the bend before it is
+// applied across the portfolio.
+Route::get('/lab/bend', function () {
+    return view('bend-demo', [
+        'client' => PortfolioClient::published()->whereNotNull('logo_path')->inGridOrder()->first(),
+    ]);
+})->name('lab.bend');
+
 /*
 |--------------------------------------------------------------------------
 | Studio (admin)
