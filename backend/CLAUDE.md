@@ -176,3 +176,68 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - After the feature tests pass, ask the user to run the complete suite with `php artisan test --compact`.
 
 </laravel-boost-guidelines>
+
+<!-- Project notes live below the Boost block so `boost:install` cannot overwrite them. -->
+
+# Maieutic Portfolio
+
+A portfolio site for a video production studio: a public grid of client work,
+and a private studio for managing it.
+
+## Layout
+
+The Laravel app lives in `backend/`, not the repository root.
+
+## Stack
+
+Laravel 13, Livewire 4, Tailwind 4, Pest 4, PostgreSQL.
+
+Livewire components are **multi-file**: `resources/views/components/⚡<name>/`
+holds `<name>.php` (the class) and `<name>.blade.php` (the markup). Keeping
+them apart is deliberate - two people can work on one component at once. Create
+them with `php artisan make:livewire <name> --mfc`.
+
+Page views wrap components in a layout addressed with a namespace separator:
+`<x-layouts::app>` and `<x-layouts::admin>`, not a dot.
+
+## Domain
+
+`PortfolioClient` has many `PortfolioVideo`. Clients are `educational` or
+`corporate`, carry their own gradient stops, and render at one of three tile
+sizes. A video is either an uploaded file (`video_path`) or a pasted
+YouTube/Vimeo link (`video_url`); an upload always wins over a link, and a row
+with neither is a placeholder awaiting footage.
+
+## Storage
+
+Logos and films use separate disks on purpose - see `docs/media-storage.md`.
+Logos are small, static and committed under `storage/app/public/logos`, so
+`LOGO_DISK` stays on the public disk. Films are large and uploaded through the
+studio, so `FILM_DISK` is what points at Cloudflare R2 in production.
+
+Never resolve a media URL with `asset('storage/...')`. Go through the disk:
+`Storage::disk(config('filesystems.films'))->url($path)`.
+
+## The studio
+
+`/studio`, behind auth. There is no registration route by design; accounts are
+created with `php artisan studio:user`. The demo account is seeded only in
+`local` and `testing`.
+
+## Database
+
+PostgreSQL, and the test suite runs against it too, so dialect differences
+surface in tests rather than in production. `LIKE` is case-sensitive on
+Postgres - use `whereLike($column, $value, caseSensitive: false)` for
+user-facing search, never a bare `like`.
+
+## Working with others
+
+Two people work on this repository from one GitHub account, so commits cannot
+be told apart by author. Branch names carry the owner: `sri/...`, `srusti/...`.
+
+Prefer branching from `main` over stacking one pull request on another. Two
+commits have already been stranded by stacking: the base merged first, the
+stacked branch was left pointing at a dead end, and GitHub still reported it
+merged. If you must stack, verify the commit reached `main` afterwards with
+`git merge-base --is-ancestor <sha> origin/main`.
